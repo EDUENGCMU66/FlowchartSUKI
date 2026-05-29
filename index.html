@@ -1,90 +1,13 @@
 <!DOCTYPE html>
 <html lang="th">
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <head>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-// ══════════════════════════════════════════════
-//  CONSTANTS & STATE + FIREBASE (ช่องใส่ Config)
-// ══════════════════════════════════════════════
-const DEPT_COLORS=[
-  '#4f6ef7','#22c55e','#f59e0b','#ef4444','#a855f7',
-  '#06b6d4','#f97316','#ec4899','#84cc16','#14b8a6'
-];
-const MTH=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DAY_TH=['อา','จ','อ','พ','พฤ','ศ','ส'];
+<title>EventFlow</title>
 
-let S = {
-  events:[], cur:null,
-  view:'month', zoom:1, px:0, py:0,
-  editId:null, rp:null, tab:'chart',
-  filter:'all', logs:[]
-};
-const uid=()=>Math.random().toString(36).slice(2,9);
-const tod=()=>new Date().toISOString().slice(0,10);
-const addDays=(b,n)=>{const d=new Date(b);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
-const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-// 👇 ช่องสำหรับใส่ Firebase Config ของคุณ 👇
-const firebaseConfig = {
-  apiKey: "AIzaSyCTZscUEuMuZR6eTBdFLyMruERuv02Q4W8",
-  authDomain: "flowchartsuki.firebaseapp.com",
-  databaseURL: "https://flowchartsuki-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "flowchartsuki",
-  storageBucket: "flowchartsuki.firebasestorage.app",
-  messagingSenderId: "143113340669",
-  appId: "1:143113340669:web:64de05e6f7c5b1a6cde094",
-  measurementId: "G-ZDWCF5T1QZ"
-};
-
-
-// เริ่มต้นใช้งาน Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.database();
-
-// ฟังก์ชัน Save: บันทึกข้อมูลขึ้น Realtime Database
-const save = () => {
-  try {
-    db.ref('eventFlowData').set(S);
-  } catch(e) {
-    console.error("Firebase Save Error: ", e);
-  }
-};
-
-// ฟังก์ชัน Load: ดึงข้อมูลและรอรับการอัปเดตแบบเรียลไทม์
-const load = () => {
-  try {
-    db.ref('eventFlowData').on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.events) {
-        S = { ...S, ...data };
-        
-        // อัปเดตหน้าจอทันทีเมื่อมีข้อมูลใหม่เข้ามาจากอุปกรณ์อื่น
-        if (document.getElementById('app')) {
-          renderAll();
-          if (S.tab === 'list') ListView.render();
-          if (S.rp === 'log') renderPanel();
-        }
-      }
-    });
-  } catch(e) {
-    console.error("Firebase Load Error: ", e);
-  }
-};
-
-load();
-const curEv=()=>S.events.find(e=>e.id===S.cur);
-
-function addLog(m){
-  S.logs.unshift({t:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),m});
-  if(S.logs.length>80)S.logs.length=80;
-  save(); // บันทึก log ขึ้น Firebase ด้วย
-}
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════
@@ -685,7 +608,7 @@ input, select, textarea { font-family: var(--font); }
 }
 .ov.open .proj-box { transform: scale(1) translateY(0); }
 .proj-hd {
-  padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+  padding: 18px 20px 14px border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
 }
 .proj-grid {
@@ -790,7 +713,6 @@ input, select, textarea { font-family: var(--font); }
 <body>
 <div id="app">
 
-<!-- SIDE NAV -->
 <div id="sidenav">
   <div class="sn-logo">EF</div>
   <button class="sn-btn on" onclick="UI.openProjects()">
@@ -811,10 +733,8 @@ input, select, textarea { font-family: var(--font); }
   </button>
 </div>
 
-<!-- MAIN -->
 <div id="main">
 
-  <!-- TITLEBAR -->
   <div id="titlebar">
     <div class="ev-selector" onclick="UI.openProjects()">
       <span id="ev-name" style="font-size:13px;font-weight:600;color:var(--cf)">เลือกโปรเจกต์</span>
@@ -829,7 +749,6 @@ input, select, textarea { font-family: var(--font); }
     <button class="btn btn-primary btn-xs" onclick="Task.openAdd()">+ งาน</button>
   </div>
 
-  <!-- TAB BAR -->
   <div id="tabbar">
     <button class="tab-btn on" onclick="UI.switchTab('chart')">
       ▦ แผนภูมิ <span class="tab-count" id="tc-chart">0</span>
@@ -839,7 +758,6 @@ input, select, textarea { font-family: var(--font); }
     </button>
   </div>
 
-  <!-- TOOLBAR -->
   <div id="toolbar">
     <div class="tbar-group">
       <div class="seg">
@@ -859,10 +777,8 @@ input, select, textarea { font-family: var(--font); }
     <button class="btn btn-ghost btn-xs" onclick="Canvas.reset()" title="Reset view">⊡ Reset</button>
   </div>
 
-  <!-- CONTENT -->
   <div id="content">
 
-    <!-- CANVAS VIEW -->
     <div id="canvas-view">
       <div id="canvas-empty" style="display:none">
         <div class="empty-icon">◫</div>
@@ -902,10 +818,8 @@ input, select, textarea { font-family: var(--font); }
       </div>
     </div>
 
-    <!-- LIST VIEW -->
     <div id="list-view"></div>
 
-    <!-- RIGHT PANEL -->
     <div id="rpanel">
       <div class="rp-inner">
         <div class="rp-head">
@@ -917,12 +831,9 @@ input, select, textarea { font-family: var(--font); }
     </div>
   </div>
 </div>
-</div>
 
-<!-- tooltip -->
 <div id="tt"></div>
 
-<!-- ── PROJECT LIST ── -->
 <div class="ov" id="ov-proj">
   <div class="proj-box">
     <div class="proj-hd">
@@ -936,7 +847,6 @@ input, select, textarea { font-family: var(--font); }
   </div>
 </div>
 
-<!-- ── TASK MODAL ── -->
 <div class="ov" id="ov-task">
   <div class="modal">
     <div class="modal-hd">
@@ -1003,7 +913,6 @@ input, select, textarea { font-family: var(--font); }
   </div>
 </div>
 
-<!-- ── INPUT DIALOG ── -->
 <div class="ov" id="ov-input">
   <div class="sm-box">
     <div class="sm-hd" id="inp-title">Input</div>
@@ -1017,7 +926,6 @@ input, select, textarea { font-family: var(--font); }
   </div>
 </div>
 
-<!-- ── CONFIRM DIALOG ── -->
 <div class="ov" id="ov-confirm">
   <div class="sm-box">
     <div class="sm-hd" id="cf-title">Confirm</div>
@@ -1029,7 +937,6 @@ input, select, textarea { font-family: var(--font); }
   </div>
 </div>
 
-<!-- ── RESCHEDULE ── -->
 <div class="ov" id="ov-resched">
   <div class="rs-box">
     <div class="modal-hd">
@@ -1055,9 +962,8 @@ input, select, textarea { font-family: var(--font); }
 </div>
 
 <script>
-
 // ══════════════════════════════════════════════
-//  CONSTANTS & STATE + FIREBASE (ช่องใส่ Config)
+//  CONSTANTS & STATE + FIREBASE
 // ══════════════════════════════════════════════
 const DEPT_COLORS=[
   '#4f6ef7','#22c55e','#f59e0b','#ef4444','#a855f7',
@@ -1076,14 +982,61 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const tod=()=>new Date().toISOString().slice(0,10);
 const addDays=(b,n)=>{const d=new Date(b);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
-const save=()=>{try{localStorage.setItem('ef4',JSON.stringify(S))}catch(e){}};
-const load=()=>{try{const s=JSON.parse(localStorage.getItem('ef4'));if(s?.events)S={...S,...s}}catch(e){}};
+
+// Firebase Config ของคุณ
+const firebaseConfig = {
+  apiKey: "AIzaSyCTZscUEuMuZR6eTBdFLyMruERuv02Q4W8",
+  authDomain: "flowchartsuki.firebaseapp.com",
+  databaseURL: "https://flowchartsuki-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "flowchartsuki",
+  storageBucket: "flowchartsuki.firebasestorage.app",
+  messagingSenderId: "143113340669",
+  appId: "1:143113340669:web:64de05e6f7c5b1a6cde094",
+  measurementId: "G-ZDWCF5T1QZ"
+};
+
+// เริ่มต้นใช้งาน Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+// ฟังก์ชัน Save: บันทึกข้อมูลขึ้น Realtime Database
+const save = () => {
+  try {
+    db.ref('eventFlowData').set(S);
+  } catch(e) {
+    console.error("Firebase Save Error: ", e);
+  }
+};
+
+// ฟังก์ชัน Load: ดึงข้อมูลและรอรับการอัปเดตแบบเรียลไทม์
+const load = () => {
+  try {
+    db.ref('eventFlowData').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.events) {
+        S = { ...S, ...data };
+        // อัปเดตหน้าจอทันทีเมื่อมีข้อมูลใหม่เข้ามาจากอุปกรณ์อื่น
+        if (document.getElementById('app')) {
+          renderAll();
+          if (S.tab === 'list') ListView.render();
+          if (S.rp === 'log') renderPanel();
+        }
+      }
+    });
+  } catch(e) {
+    console.error("Firebase Load Error: ", e);
+  }
+};
+
 load();
 const curEv=()=>S.events.find(e=>e.id===S.cur);
 
 function addLog(m){
   S.logs.unshift({t:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),m});
   if(S.logs.length>80)S.logs.length=80;
+  save(); 
   if(S.rp==='log')renderPanel();
 }
 
@@ -1367,7 +1320,6 @@ function renderTasks(ev,cols){
       const w=durW(t.start,t.end);
       const isDone=t.status==='done';
       const bg=t.ms?'':`${d.color}`;
-      const textCol=t.ms?'#fff':'#fff';
       const alpha=isDone?'80':'cc';
       return`<div class="tbar${t.ms?' milestone':''}${isDone?' tbar-done':''}"
         style="left:${x}px;width:${w}px;${t.ms?'':'background:'+bg+alpha+';border-color:'+bg+'40;'}"
@@ -1775,9 +1727,13 @@ document.addEventListener('keydown',e=>{
 // ══════════════════════════════════════════════
 Canvas.setup();
 S.tab=S.tab||'chart';
+
+// ถ้าโหลดจาก Firebase เสร็จ ข้อมูลจะอัปเดตผ่าน load() เอง
+// แต่เรนเดอร์เปล่าๆ ไว้รอก่อน
 renderAll();
 if(S.tab==='list')UI.switchTab('list');
 if(!S.cur&&S.events.length===0)setTimeout(()=>UI.openProjects(),200);
+
 </script>
 </body>
 </html>
