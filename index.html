@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <head>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -1053,8 +1055,9 @@ input, select, textarea { font-family: var(--font); }
 </div>
 
 <script>
+
 // ══════════════════════════════════════════════
-//  CONSTANTS & STATE
+//  CONSTANTS & STATE + FIREBASE (ช่องใส่ Config)
 // ══════════════════════════════════════════════
 const DEPT_COLORS=[
   '#4f6ef7','#22c55e','#f59e0b','#ef4444','#a855f7',
