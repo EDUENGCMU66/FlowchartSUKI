@@ -58,6 +58,30 @@
   --font: 'IBM Plex Sans Thai', sans-serif;
   --mono: 'IBM Plex Mono', monospace;
 }
+  /* ═══════════════════════════════════════
+   THEMES (โหมดสว่าง)
+═══════════════════════════════════════ */
+body.light-mode {
+  --c0: #f4f5f7; /* พื้นหลังสุด */
+  --c1: #ffffff; /* แผงเมนูและพื้นหลังหลัก */
+  --c2: #f9fafb; /* แถบเครื่องมือ */
+  --c3: #e5e7eb; /* เส้นขอบและ hover */
+  --c4: #d1d5db; /* ปุ่มที่ถูกเลือก */
+  --c5: #9ca3af; /* ตัวหนังสือสีจางสุด */
+  --c6: #6b7280; /* ตัวหนังสือรอง */
+  --c7: #4b5563; /* ตัวหนังสือหลักจางๆ */
+  --c8: #374151; /* ตัวหนังสือหัวข้อ */
+  --c9: #1f2937; /* ตัวหนังสือเน้นคำ */
+  --cf: #111827; /* ตัวหนังสือสีเข้มสุด (แทนสีขาวเดิม) */
+
+  --border: #e5e7eb;
+  --border2: #d1d5db;
+  --border3: #9ca3af;
+
+  /* ปรับเงาให้ดูละมุนขึ้นในโหมดสว่าง */
+  --shadow: 0 1px 3px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.05);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,.08), 0 20px 60px rgba(0,0,0,.08);
+}
 
 /* ═══════════════════════════════════════
    RESET & BASE
@@ -708,6 +732,52 @@ input, select, textarea { font-family: var(--font); }
 .tt-row { display: flex; gap: 8px; margin-top: 4px; }
 .tt-k { color: var(--c7); width: 52px; flex-shrink: 0; }
 .tt-v { color: var(--c9); font-weight: 500; }
+/* ── ปรับแต่งช่องเลือกวันที่ให้อ่านง่ายขึ้น ── */
+input[type="date"].fi {
+  font-family: var(--mono); /* ใช้ฟอนต์แบบ Monospace ระยะห่างตัวเลขจะเท่ากันเป๊ะ */
+  font-size: 14px; /* ขยายขนาดตัวเลขให้ใหญ่ขึ้น */
+  font-weight: 500;
+  color: var(--accent-h); /* เปลี่ยนสีตัวเลขเป็นสีฟ้าสว่างให้เด้งออกมา */
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+/* ปรับสีเมื่อกดโฟกัส (คลิกเลือก) ให้ดูละมุนขึ้น */
+input[type="date"].fi:focus {
+  background: var(--c2); 
+  border-color: var(--accent);
+  color: var(--cf); /* เปลี่ยนกลับเป็นสีขาวชั่วคราวตอนกำลังพิมพ์/เลือก */
+}
+
+/* ปรับไอคอนปฏิทินด้านขวาให้สว่างขึ้น (แก้ปัญหาไอคอนมืดกลืนไปกับแบล็คกราวด์) */
+input[type="date"].fi::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.7); /* พลิกสีไอคอนเป็นสีสว่าง */
+  cursor: pointer;
+  padding: 4px;
+  transition: opacity 0.2s;
+}
+
+input[type="date"].fi::-webkit-calendar-picker-indicator:hover {
+  opacity: 1; /* สว่างเต็มที่เมื่อเอาเมาส์ไปวาง */
+}
+
+/* หากคุณมีการใช้โหมดสว่าง (Light Mode) ให้ใส่บรรทัดนี้เผื่อไว้ด้วย */
+body.light-mode input[type="date"].fi::-webkit-calendar-picker-indicator {
+  filter: invert(0) opacity(0.6); /* โหมดสว่างปรับไอคอนกลับเป็นสีเข้ม */
+} 
+  /* ── ป้องกันข้อความโดนตัดสำหรับงานวันเดียว ── */
+.tbar.tbar-short {
+  overflow: visible !important; /* ยกเลิกการตัดคำ ปล่อยให้ล้นออกมาได้ */
+  z-index: 15; /* ดันให้อยู่บนสุดเวลามีงานอื่นอยู่ข้างๆ จะได้ไม่โดนทับ */
+  
+  /* ใส่เงาให้ตัวหนังสือ เผื่อมันล้นไปทับเส้น Grid แล้วจะอ่านยาก */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.6);
+}
+
+/* ถ้าใช้คู่กับระบบ Light Mode (โหมดสว่าง) ให้แก้เงาเป็นสีขาวจะได้อ่านง่ายๆ */
+body.light-mode .tbar.tbar-short {
+  text-shadow: 0 1px 3px rgba(255,255,255,0.9), 0 0 3px rgba(255,255,255,0.9);
+}
 </style>
 </head>
 <body>
@@ -727,6 +797,10 @@ input, select, textarea { font-family: var(--font); }
   <div class="sn-sep"></div>
   <button class="sn-btn" style="margin-top:auto" onclick="UI.exportNote()">
     <span>↓</span><span class="tt">Export</span>
+  </button>
+  <div class="sn-sep"></div>
+  <button class="sn-btn" onclick="UI.toggleTheme()">
+    <span>◐</span><span class="tt">เปลี่ยนธีม</span>
   </button>
   <button class="sn-btn" onclick="UI.rolePicker()">
     <span>⊙</span><span class="tt">ตั้งค่า</span>
@@ -962,6 +1036,10 @@ input, select, textarea { font-family: var(--font); }
 </div>
 
 <script>
+  // ตรวจสอบธีมเดิมที่เคยเลือกไว้
+if (localStorage.getItem('ef_theme') === 'light') {
+  document.body.classList.add('light-mode');
+}
 // ══════════════════════════════════════════════
 //  CONSTANTS & STATE + FIREBASE
 // ══════════════════════════════════════════════
@@ -1004,7 +1082,11 @@ const db = firebase.database();
 // ฟังก์ชัน Save: บันทึกข้อมูลขึ้น Realtime Database
 const save = () => {
   try {
-    db.ref('eventFlowData').set(S);
+    // บันทึกเฉพาะข้อมูล events และ logs (ไม่ต้องบันทึกพวกพิกัดซูมหน้าจอของแต่ละคน)
+    db.ref('eventFlowData').set({
+      events: S.events,
+      logs: S.logs
+    });
   } catch(e) {
     console.error("Firebase Save Error: ", e);
   }
@@ -1015,13 +1097,31 @@ const load = () => {
   try {
     db.ref('eventFlowData').on('value', (snapshot) => {
       const data = snapshot.val();
-      if (data && data.events) {
-        S = { ...S, ...data };
-        // อัปเดตหน้าจอทันทีเมื่อมีข้อมูลใหม่เข้ามาจากอุปกรณ์อื่น
+      
+      if (data) {
+        // 🔥 ดักปัญหา Firebase ลบ Array ทิ้งด้วย (|| [])
+        S.events = (data.events || []).map(ev => ({
+          ...ev,
+          departments: ev.departments || [],
+          tasks: ev.tasks || []
+        }));
+        S.logs = data.logs || [];
+        
+        // อัปเดตหน้าจอ
         if (document.getElementById('app')) {
+          if (document.getElementById('ov-proj').classList.contains('open')) Proj.render();
           renderAll();
           if (S.tab === 'list') ListView.render();
           if (S.rp === 'log') renderPanel();
+        }
+      } else {
+        // 🔥 กรณีลบข้อมูลทิ้งจนหมดเกลี้ยงฐานข้อมูล
+        S.events = [];
+        S.logs = [];
+        if (document.getElementById('app')) {
+          if (document.getElementById('ov-proj').classList.contains('open')) Proj.render();
+          renderAll();
+          if (S.tab === 'list') ListView.render();
         }
       }
     });
@@ -1029,7 +1129,6 @@ const load = () => {
     console.error("Firebase Load Error: ", e);
   }
 };
-
 load();
 const curEv=()=>S.events.find(e=>e.id===S.cur);
 
@@ -1657,6 +1756,12 @@ function renderPanel(){
 const UI={
   openProjects(){Proj.render();document.getElementById('ov-proj').classList.add('open');},
   closeProjects(){document.getElementById('ov-proj').classList.remove('open');},
+  // เพิ่มฟังก์ชันนี้เข้าไป
+  toggleTheme(){
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    localStorage.setItem('ef_theme', isLight ? 'light' : 'dark');
+  },
   setView(v){
     S.view=v;
     document.querySelectorAll('.seg-btn').forEach((b,i)=>b.classList.toggle('on',['month','week','day'][i]===v));
